@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+uploads/
+output/
+music/*
+!music/.gitkeep
+frontend/node_modules/
+frontend/dist/
+jobs.json
+test_assets/*.mp4

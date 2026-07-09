@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shorts-factory",
+      "runtimeExecutable": "/Users/yashik/Downloads/learning/shorts-factory/.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "backend.main:app", "--port", "8000"],
+      "cwd": "/Users/yashik/Downloads/learning/shorts-factory",
+      "port": 8000
+    }
+  ]
+}
