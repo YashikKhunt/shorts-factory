@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    env_file:
+      - path: .env
+        required: false        # only ANTHROPIC_API_KEY; app degrades gracefully without it
+    volumes:
+      - ./uploads:/app/uploads
+      - ./output:/app/output          # rendered shorts land on the host
+      - ./music:/app/music            # drop background music here
+      - ./data:/app/data              # jobs.json persistence
+      - whisper-cache:/root/.cache/huggingface  # ~460MB model, survives rebuilds
+    networks: [shorts-net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/jobs', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [shorts-net]
+    restart: unless-stopped
+
+networks:
+  shorts-net:
+    driver: bridge
+
+volumes:
+  whisper-cache:

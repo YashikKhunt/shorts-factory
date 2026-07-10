@@ -6,6 +6,7 @@ restarts (outputs are on disk regardless).
 """
 import asyncio
 import json
+import os
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
@@ -14,7 +15,8 @@ from pathlib import Path
 from .config import PROJECT_ROOT, Settings
 from .pipeline.runner import process_video
 
-SNAPSHOT = PROJECT_ROOT / "jobs.json"
+SNAPSHOT = Path(os.environ.get("JOBS_SNAPSHOT") or PROJECT_ROOT / "jobs.json")
+SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
 
 jobs: dict[str, "Job"] = {}
 queue: asyncio.Queue = asyncio.Queue()

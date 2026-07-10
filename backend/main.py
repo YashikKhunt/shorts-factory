@@ -99,7 +99,10 @@ def job_download(job_id: str):
 @app.post("/api/jobs/{job_id}/reveal")
 def job_reveal(job_id: str):
     path = _result_file(job_id, "video")
-    subprocess.run(["open", "-R", str(path)], check=False)
+    try:
+        subprocess.run(["open", "-R", str(path)], check=False)
+    except FileNotFoundError:  # no `open` binary outside macOS (e.g. in Docker)
+        pass
     return {"ok": True}
 
 

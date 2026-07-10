@@ -17,6 +17,8 @@ FONT_CANDIDATES = [
     "/System/Library/Fonts/Avenir Next.ttc",
     "/System/Library/Fonts/Helvetica.ttc",
     "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux (fonts-dejavu-core)
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
 ]
 
 

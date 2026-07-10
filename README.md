@@ -40,6 +40,30 @@ CLI alternative (no browser):
 .venv/bin/python -m backend.scripts.process_one path/to/clip.mov
 ```
 
+## Run with Docker
+
+No local Python/ffmpeg/node needed — two containers (nginx frontend + FastAPI
+backend) on a private `shorts-net` network; only the frontend is exposed:
+
+```bash
+cp .env.example .env        # optional — Anthropic API key for AI titles
+docker compose up --build
+```
+
+Open http://localhost:3000. Rendered Shorts still land in `./output/` on the
+host, uploads in `./uploads/`, and music tracks go in `./music/` (restart the
+backend after adding music). The job list persists in `./data/jobs.json`, and
+the ~460 MB Whisper model is cached in a named volume (`whisper-cache`) so it
+downloads only once — the first render needs network access and a few extra
+minutes for that download.
+
+Notes:
+- The container uses `docker/config.docker.yaml` (baked in as `/app/config.yaml`):
+  `libx264` instead of macOS's `h264_videotoolbox`, DejaVu Sans captions.
+- A `jobs.json` from previous native macOS runs isn't carried over (it stores
+  absolute mac paths) — your rendered outputs in `./output/` are untouched.
+- The "Reveal in Finder" button is a no-op inside Docker; use the download button.
+
 Outputs land in `output/<clip>/`: the `_short.mp4`, a human-readable
 `_metadata.txt` (titles / paste-ready hashtag line / hook), and `_metadata.json`.
 

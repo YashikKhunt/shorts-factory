@@ -1,0 +1,53 @@
+# Docker (Linux) variant of config.yaml — copied into the backend image as
+# /app/config.yaml. Differences from the macOS config: libx264 encoder
+# (h264_videotoolbox doesn't exist on Linux) and DejaVu Sans caption font.
+paths:
+  music_dir: ./music
+  output_dir: ./output
+  uploads_dir: ./uploads
+
+video:
+  target_duration: 25        # seconds
+  segment_strategy: energy   # energy | first
+  aspect_strategy: crop      # crop | pad
+  color_grade:
+    enabled: true
+    saturation: 1.15
+    contrast: 1.05
+  fade:
+    in: 0.4
+    out: 0.5
+  fps: 30
+  encoder: libx264           # macOS-only h264_videotoolbox unavailable in the container
+  bitrate: 10M               # used by videotoolbox
+  crf: 18                    # used by libx264
+
+audio:
+  music_mode: duck           # duck | mix | replace | none
+  music_gain_db: -14         # music level before ducking/mixing
+  loudnorm_target: -14       # integrated LUFS for original audio
+
+captions:
+  enabled: true
+  font: DejaVu Sans
+  size: 58
+  bottom_margin: 420         # px from bottom edge (clear of YT Shorts UI)
+
+hook:
+  enabled: true
+  duration: 2.3              # seconds on screen
+  fallback_text: "Wait for it…"
+
+whisper:
+  model: small               # tiny | base | small | medium
+  compute_type: int8
+  min_speech_seconds: 1.5
+  max_no_speech_prob: 0.6
+
+claude:
+  model: claude-sonnet-5
+  title_count: 3
+
+hashtags:
+  broad: ["#shorts", "#travel", "#travelvlog", "#explore", "#wanderlust"]
+  niche_hint: adventure/nature travel
