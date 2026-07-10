@@ -48,6 +48,10 @@ claude:
   model: claude-sonnet-5
   title_count: 3
 
+compilation:
+  min_clip_seconds: 3.0      # shortest cut a clip can get in a combined Short
+  max_clips: 8               # upload limit for "combine into one Short"
+
 hashtags:
   broad: ["#shorts", "#travel", "#travelvlog", "#explore", "#wanderlust"]
   niche_hint: adventure/nature travel

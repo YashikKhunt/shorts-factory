@@ -7,6 +7,8 @@ const STAGE_LABELS = {
   probing: "reading video info",
   selecting: "finding best segment",
   transcribing: "listening for speech",
+  analyzing_clips: "analyzing each clip",
+  deciding_edit: "AI planning the edit",
   analyzing: "AI writing titles",
   rendering: "rendering",
   writing_outputs: "saving files",

@@ -45,6 +45,12 @@ export default function ResultPanel({ job }) {
 
         <h4>On-video hook</h4>
         <span className="hook-chip">{r.hook}</span>
+        {r.clips && (
+          <div className="stage-line" style={{ marginTop: 10 }}>
+            ✂ cut from {r.clips.length} clips
+            {r.edit_fallback && " (energy-based fallback edit — set ANTHROPIC_API_KEY for AI cuts)"}
+          </div>
+        )}
         {r.metadata_fallback && (
           <div className="stage-line" style={{ marginTop: 10 }}>
             ⚠ offline fallback titles — set ANTHROPIC_API_KEY in .env for AI ones

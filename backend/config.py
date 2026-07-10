@@ -78,6 +78,11 @@ class Claude(BaseModel):
     title_count: int = 3
 
 
+class Compilation(BaseModel):
+    min_clip_seconds: float = 3.0
+    max_clips: int = 8
+
+
 class Hashtags(BaseModel):
     broad: list[str] = ["#shorts", "#travel"]
     niche_hint: str = "travel"
@@ -91,6 +96,7 @@ class Settings(BaseModel):
     hook: Hook = Hook()
     whisper: Whisper = Whisper()
     claude: Claude = Claude()
+    compilation: Compilation = Compilation()
     hashtags: Hashtags = Hashtags()
 
     @property

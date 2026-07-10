@@ -99,6 +99,12 @@ def _human_metadata(r: dict) -> str:
         lines.append(f"Location: {r['location_guess']}")
     if r.get("transcript"):
         lines += ["", "=== TRANSCRIPT ===", r["transcript"]]
+    if r.get("clips"):
+        lines += ["", "=== EDIT ==="]
+        lines += [f"{i + 1}. {c['name']}  "
+                  f"{c['source_start']:.1f}s-{c['source_start'] + c['duration']:.1f}s"
+                  f"  → timeline {c['timeline_start']:.1f}s"
+                  for i, c in enumerate(r["clips"])]
     if r.get("metadata_fallback"):
         lines += ["", "(!) Offline fallback metadata — set ANTHROPIC_API_KEY for AI titles."]
     lines.append("")
