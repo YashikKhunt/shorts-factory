@@ -10,3 +10,9 @@ frontend/dist/
 jobs.json
 data/
 test_assets/*.mp4
+
+# CI / test artifacts
+requirements-ci.txt
+pytest-output.txt
+.coverage
+.pytest_cache/
