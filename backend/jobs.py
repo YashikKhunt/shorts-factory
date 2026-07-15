@@ -13,6 +13,7 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
 from .config import PROJECT_ROOT, Settings
+from .pipeline.compilation import process_compilation
 from .pipeline.runner import process_video
 
 SNAPSHOT = Path(os.environ.get("JOBS_SNAPSHOT") or PROJECT_ROOT / "jobs.json")
@@ -33,10 +34,12 @@ class Job:
     error: str | None = None
     result: dict | None = None
     created_at: float = field(default_factory=time.time)
+    src_paths: list[str] = field(default_factory=list)  # 2+ → compilation job
 
     def public(self) -> dict:
         d = asdict(self)
         d.pop("src_path")
+        d.pop("src_paths")
         return d
 
 
@@ -47,10 +50,19 @@ def create_job(filename: str, src_path: Path) -> Job:
     return job
 
 
+def create_compilation_job(filenames: list[str]) -> Job:
+    job = Job(id=uuid.uuid4().hex[:12],
+              filename=f"{len(filenames)} clips – {filenames[0]}", src_path="")
+    jobs[job.id] = job
+    save_snapshot()
+    return job
+
+
 def save_snapshot() -> None:
     try:
         SNAPSHOT.write_text(json.dumps(
-            [j.public() | {"src_path": j.src_path} for j in jobs.values()]))
+            [j.public() | {"src_path": j.src_path, "src_paths": j.src_paths}
+             for j in jobs.values()]))
     except OSError:
         pass
 
@@ -86,9 +98,16 @@ async def worker(cfg: Settings) -> None:
             j.progress = round(p, 1)
 
         try:
-            result = await loop.run_in_executor(
-                None, lambda: process_video(Path(job.src_path), cfg,
-                                            on_stage, on_progress))
+            if len(job.src_paths) > 1:
+                result = await loop.run_in_executor(
+                    None, lambda: process_compilation(
+                        [Path(p) for p in job.src_paths], cfg,
+                        on_stage, on_progress,
+                        name=f"compilation_{job.id}"))
+            else:
+                result = await loop.run_in_executor(
+                    None, lambda: process_video(Path(job.src_path), cfg,
+                                                on_stage, on_progress))
             job.result = result
             job.status, job.stage, job.progress = "done", "done", 100.0
         except Exception as e:  # keep the worker alive for the next job

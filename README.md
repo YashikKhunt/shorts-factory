@@ -1,5 +1,7 @@
 # Shorts Factory
 
+![tests](https://github.com/YashikKhunt/shorts-factory/actions/workflows/tests.yml/badge.svg)
+
 Drop raw trip videos in — get ready-to-post YouTube Shorts out: trimmed to the
 best ~25 seconds, 9:16 vertical, background music, auto captions, an on-video
 hook line, and 3 AI-generated title options with curated hashtags. You upload

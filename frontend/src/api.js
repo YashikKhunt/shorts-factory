@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-export async function uploadFiles(files) {
+export async function uploadFiles(files, combine = false) {
   const form = new FormData();
   for (const f of files) form.append("files", f);
+  form.append("combine", combine ? "1" : "0");
   const res = await fetch("/api/upload", { method: "POST", body: form });
   if (!res.ok) throw new Error((await res.json()).detail || "Upload failed");
   return res.json();

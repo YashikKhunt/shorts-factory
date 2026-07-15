@@ -5,7 +5,7 @@ import subprocess
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -32,27 +32,48 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Shorts Factory", lifespan=lifespan)
 
 
+async def _save_upload(f: UploadFile, dest: Path) -> None:
+    with dest.open("wb") as out:
+        while chunk := await f.read(1 << 20):
+            out.write(chunk)
+
+
 @app.post("/api/upload")
-async def upload(files: list[UploadFile]):
+async def upload(files: list[UploadFile], combine: str = Form("0")):
+    valid = [(f, Path(f.filename or "clip.mp4").name) for f in files
+             if Path(f.filename or "clip.mp4").suffix.lower() in VIDEO_EXT]
+    if not valid:
+        raise HTTPException(400, "No video files in upload")
+
+    if combine in ("1", "true", "on") and len(valid) >= 2:
+        if len(valid) > cfg.compilation.max_clips:
+            raise HTTPException(
+                400, f"Combine supports up to {cfg.compilation.max_clips} clips")
+        job = jobs.create_compilation_job([name for _, name in valid])
+        job_dir = cfg.paths.uploads_dir / job.id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        for i, (f, name) in enumerate(valid):
+            safe = re.sub(r"[^A-Za-z0-9._-]+", "_", name)
+            dest = job_dir / f"{i:02d}_{safe}"  # index keeps selection order
+            await _save_upload(f, dest)
+            job.src_paths.append(str(dest))
+        job.src_path = job.src_paths[0]
+        jobs.save_snapshot()
+        await jobs.queue.put(job.id)
+        return {"jobs": [job.public()]}
+
     created = []
-    for f in files:
-        name = Path(f.filename or "clip.mp4").name
-        if Path(name).suffix.lower() not in VIDEO_EXT:
-            continue
+    for f, name in valid:
         job = jobs.create_job(name, Path())
         job_dir = cfg.paths.uploads_dir / job.id
         job_dir.mkdir(parents=True, exist_ok=True)
         safe = re.sub(r"[^A-Za-z0-9._-]+", "_", name)
         dest = job_dir / safe
-        with dest.open("wb") as out:
-            while chunk := await f.read(1 << 20):
-                out.write(chunk)
+        await _save_upload(f, dest)
         job.src_path = str(dest)
         created.append(job.public())
         await jobs.queue.put(job.id)
     jobs.save_snapshot()
-    if not created:
-        raise HTTPException(400, "No video files in upload")
     return {"jobs": created}
 
 

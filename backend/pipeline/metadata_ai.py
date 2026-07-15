@@ -65,7 +65,7 @@ def _fallback_metadata(src_name: str, cfg, transcript: str | None) -> VideoMetad
 
 def generate_metadata(frames: list[Path], info: ProbeResult, src_name: str,
                       transcript_segments: list[tuple[float, float, str]] | None,
-                      cfg) -> VideoMetadata:
+                      cfg, extra_context: list[str] | None = None) -> VideoMetadata:
     transcript = " ".join(t for _, _, t in transcript_segments) \
         if transcript_segments else None
     if not cfg_key_present(cfg):
@@ -78,6 +78,7 @@ def generate_metadata(frames: list[Path], info: ProbeResult, src_name: str,
         context_lines.append(f"GPS coordinates: {info.gps[0]:.5f}, {info.gps[1]:.5f}")
     context_lines.append(f"Speech transcript: {transcript}" if transcript
                          else "No speech — ambient trip footage.")
+    context_lines += extra_context or []
 
     content = []
     for f in frames:
