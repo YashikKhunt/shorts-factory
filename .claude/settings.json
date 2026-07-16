@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Another subagent just finished. Review the current working tree using the post-agent-reviewer instructions: run git status and git diff HEAD, inspect every change for bugs, scope violations, secrets, and debug leftovers, and return a compact PASS/NEEDS-FIX report with file:line references. Do not modify any files.",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
